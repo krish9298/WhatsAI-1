@@ -2,12 +2,12 @@
 
 
 
-from selenium import webdriver 
-from selenium.webdriver.support.ui import WebDriverWait 
-from selenium.webdriver.support import expected_conditions as EC 
-from selenium.webdriver.common.keys import Keys 
-from selenium.webdriver.common.by import By 
-import time 
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import time
 from time import sleep
 import random
 from pathlib import Path
@@ -16,8 +16,8 @@ import utility
 from threading import Thread
 import os
 import paths
-import reminder
-import getEvent
+#import reminder
+#import getEvent
 
 # Old pages //*[@id="main"]/div[3]/div/div/div[3]/div[19]/div/div
 # New pages //*[@id="main"]/div[3]/div/div/div[2]/div[3]/div/div/div[1]/div
@@ -37,10 +37,10 @@ CHAT_COUNT = 25
 MESSAGE_COUNT = 50
 EMAIL = paths.EMAIL
 
-driver = webdriver.Chrome(DRIVER_PATH) 
-driver.get(URL)                              
+driver = webdriver.Chrome(DRIVER_PATH)
+driver.get(URL)
 
-wait = WebDriverWait(driver, 600) 
+wait = WebDriverWait(driver, 600)
 
 replyOnlyList = Path(REPLY_ONLY_LIST_PATH).read_text().split('\n')
 slangWords = Path(SLANG_WORDS_PATH).read_text().split('\n')
@@ -110,15 +110,15 @@ def initialize():
         initialize()
     else:
         print('\033c')
-        
+
         for key,value in lastReadMessages.items():
-            print (key,' -> ',value) 
+            print (key,' -> ',value)
 
         startAssistant()
 
 def getUnreadMessages(chatName):
     global lastReadMessages
-    
+
     print ('In ',chatName)
 
     # Detecting PDFs
@@ -132,10 +132,10 @@ def getUnreadMessages(chatName):
             pdfName = ''
             for label in labels:
                 isPDF = isPDF or ('pagesPDF' in label)
-            
+
             for label in labels:
                 isPDF = isPDF or ('•' in i and 'pages' in i)
-            
+
             if (isPDF):
                 print ('PDF Detected')
                 print (labels)
@@ -158,14 +158,14 @@ def getUnreadMessages(chatName):
                     #break
                 else:
                     print (pdfName,'Already downloaded')
-            
+
         except:
             ...
-    
+
     old = []
     if (chatName in lastReadMessages):
         old = lastReadMessages[chatName]
-    
+
     print ('Old message',old)
 
     # Detecting messages
@@ -174,21 +174,21 @@ def getUnreadMessages(chatName):
         try :
             # for normal ones
             temp = driver.find_element_by_xpath('//*[@id="main"]/div[3]/div/div/div[3]/div['+str(i)+']/div/div/div[1]/div/span').text
-            #print (temp)                        
+            #print (temp)
             if (temp != ''):
                 messages.append(temp)
-            
-            
+
+
 
         except:
             try :
                 temp = driver.find_element_by_xpath('//*[@id="main"]/div[3]/div/div/div[2]/div['+str(i)+']/div/div/div[1]/div/span').text
-                
+
                 if (temp != ''):
                     messages.append(temp)
             except:
                 ...
-    
+
 
 
 
@@ -218,7 +218,7 @@ def getUnreadMessages(chatName):
 
     if (comFlag==0):
         unread=new
-    
+
     print ('Unread messages')
     print (unread)
     return unread[len(unread)-1]
@@ -232,7 +232,7 @@ def respondTo(chatHead, chatName, botHead):
     sleep(1)
     inBotPage = False
     message=getUnreadMessages(chatName)
-    
+
     print ('>>> '+message)
     response=''
     hasSlang = False
@@ -241,6 +241,7 @@ def respondTo(chatHead, chatName, botHead):
             hasSlang = True
             break
     command = message
+    print(COMMAND_LINK_FOR_VIDEO in message)
     if (hasSlang):
         response = random.choice(slangWordsResponse)
     elif (COMMAND_LINK_FOR_VIDEO in message):
@@ -260,7 +261,7 @@ def respondTo(chatHead, chatName, botHead):
                 ind = command.find(" notes")
                 subject = command[5 : ind]
                 path = HINT_PATH + subject
-            
+
             if chap == "" and utility.checkAlreadyExistingFile2(HINT_PATH, subject) == False :
                 print ("in2")
                 response = "Sorry, But I don't have such content as of now"
@@ -282,17 +283,17 @@ def respondTo(chatHead, chatName, botHead):
                 response = "Sent! Enjoy"
         else :
             response = "Say that again!"
-    # Set reminder on 2019-03-31 03:58 for calling 
+    # Set reminder on 2019-03-31 03:58 for calling
     elif ('Set reminder on ' in command ):
         details = command[37:]
         time2 = command[16:32].replace(' ', 'T')
         time2 = time2 + ':00+05:30'
-        reminder.setreminder(details, EMAIL , time2, time2)
+        #reminder.setreminder(details, EMAIL , time2, time2)
         response = 'Successful'
     else:
         print ('Chatbot generated reply')
         response = chatbot.getResponse(message)
-    
+
     print (response)
 
     if (response != ''):
@@ -321,10 +322,10 @@ def respondToCommands(botHead,command):
     # command = command.lower()
 
     flag = 0
-    # Create poll in xxx regarding xxx with options xxx,yyy,zzz for xxx minutes  
+    # Create poll in xxx regarding xxx with options xxx,yyy,zzz for xxx minutes
     print("hi")
-    
-    
+
+
     response = ''
     purpose = ""
 
@@ -341,8 +342,9 @@ def respondToCommands(botHead,command):
     else:
         print('Normal mode')
         # Normal mode
-        
+        print(command)
         st = command[7 : 11]
+        print(st)
         if st == "poll" :
             ind = command.find(" regarding")
             ind2 = command.find("in")
@@ -367,7 +369,6 @@ def respondToCommands(botHead,command):
         elif ('Give my' in command):
             command = command.lower()
             if ('number' in command):
-                
                 key = command[8:len(command)-7]
                 if (key in myDocsMap):
                     response = myDocsMap[key]
@@ -376,7 +377,9 @@ def respondToCommands(botHead,command):
             elif ('copy' in command):
                 try :
                     flag = 1
+                    print('copy bhej rha hu')
                     key = command[8:len(command)-5]
+                    print(key)
                     path = key+'.jpeg'
                     thread = Thread(target = sendDocument, args = (MY_DOCS_PATH+path,))
                     thread.start()
@@ -385,7 +388,7 @@ def respondToCommands(botHead,command):
                     response = lastCommand # "Here's your "+key
                 except:
                     response = 'Sorry '+key+' Not Found !'
-        # Add name 
+        # Add name
         elif ('Add ' in command):
             name = command[4:]
             replyOnlyList.append(name)
@@ -416,26 +419,26 @@ def respondToCommands(botHead,command):
             response = 'Bot Activated'
             print ('Bot Activated')
             isBotActive = True
-        # Set reminder on 2019-03-31 03:58 for calling 
+        # Set reminder on 2019-03-31 03:58 for calling
         elif ('Set reminder on ' in command ):
             details = command[37:]
             time2 = command[16:32].replace(' ', 'T')
             time2 = time2 + ':00+05:30'
-            reminder.setreminder(details, EMAIL , time2, time2)
+            #reminder.setreminder(details, EMAIL , time2, time2)
             response = 'Successful'
-        # getting list of upcoming events 
+        # getting list of upcoming events
         #upcoming 02 events from 2019-03-31
         elif ('upcoming ' in command ):
             date = command[24:]
             date = date + 'T01:00:00+05:30'
-            response = getEvent.upComingEvents(int(command[9:11]), date)
+            #response = getEvent.upComingEvents(int(command[9:11]), date)
         # Terminal
         elif (command == 'Terminal'):
             isCommandMode = True
             response = 'Terminal mode started'
         else :
             response = chatbot.getResponse(command)
-    
+
     response = response.replace('\n',' ')
     # Sending reply message
     if flag == 0 :
@@ -447,14 +450,14 @@ def respondToCommands(botHead,command):
                 sleep(0.5)
                 print('waiting for the button ... ')
                 sendBtn = driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[3]/button')
-                
+
                 sendBtn.click()
                 print (response + ' Sent ')
-                break 
+                break
             except:
-                ... 
+                ...
 
-        
+
 
     if responseToGroup != "" :
         flag = True
@@ -476,18 +479,18 @@ def respondToCommands(botHead,command):
                         inputBox.send_keys(responseToGroup)
                         sendBtn = driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[3]/button')
                         sendBtn.click()
-                        
+
                         thread = Thread(target = checkTimings, args = (currGroupName,responseToGroup, tim*60000, millis, botHead,purpose))
                         thread.start()
                 except:
                     print("aaya")
                     #ignore
                     ...
-    
+
     sleep(0.5)
     botHead.click()
     inBotPage = True
-    
+
     return response
 
 
@@ -515,17 +518,20 @@ def handleUnreadMessages():
                 hasUnreadMsg = hasUnreadMsg+1
         except:
             ...
-    
+
     # Responding to unread messages
+    print(hasUnreadMsg)
+    print(isBotActive)
     if (hasUnreadMsg > 0 and isBotActive):
+        print('dun dun dun dun')
         respondTo(chatHead, chatName, botHead)
-    
+
     # Detecting Commands
     if (inBotPage == False and botHead != ''):
         botHead.click()
         sleep(0.5)
         inBotPage = True
-    
+
     if (botHead != ''):
         print('Bot available')
 
@@ -558,7 +564,7 @@ def handleUnreadMessages():
 
         if (lastCommand == ''):
             lastCommand = message
-        
+
         if (message != '' and message != lastCommand):
             # New Command detected
             print ('message = ',message)
@@ -568,7 +574,7 @@ def handleUnreadMessages():
             response = respondToCommands(botHead,lastCommand)
             lastCommand = response
             ...
-    
+
     # print ('done detecting')
 
 def startAssistant():
@@ -596,7 +602,7 @@ def checkTimings(groupName, responseToGroup, start, timeInMillis, botHead, purpo
                     print("ERROR AAYA")
                     ...
 
-    
+
     chatHead.click()
 
 
@@ -615,7 +621,7 @@ def checkTimings(groupName, responseToGroup, start, timeInMillis, botHead, purpo
                     voteMap[msg[0]]=msg[msgLen-2]
         except:
             ...
-    
+
     voteCount = {}
     for key,value in voteMap.items():
         print(key,' = > ',value)
@@ -633,7 +639,7 @@ def checkTimings(groupName, responseToGroup, start, timeInMillis, botHead, purpo
     inputBox.send_keys(response)
     sendBtn = driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[3]/button')
     sendBtn.click()
-    
+
     utility.savePollResults(voteCount, purpose)
     # sleep(1)
     thread = Thread(target = sendDocument, args = (HINT_PATH+"foo.png",))
@@ -673,7 +679,7 @@ def sendDocument(path):
             break
         except:
             ...
-    
+
     #driver.find_element_by_xpath('//*[@id="app"]/div/div/div[2]/div[2]/span/di/v/span/div/div/div[2]/span[2]/div/div').click()
     # //*[@id="app"]/div/div/div[2]/div[2]/span/div/span/div/div/div[2]/span[2]/div/div
     # //*[@id="app"]/div/div/div[2]/div[2]/span/div/span/div/div/div[2]/span[2]/div/div/span

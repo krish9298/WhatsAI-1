@@ -9,7 +9,7 @@ from oauth2client import tools
 from oauth2client import file
 
 import datetime
-proxy = 'http://172.31.2.4:8080'
+proxy = 'http://172.31.102.29:3128'
 
 os.environ['http_proxy'] = proxy 
 os.environ['HTTP_PROXY'] = proxy
